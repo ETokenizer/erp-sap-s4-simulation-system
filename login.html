@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+  <meta http-equiv="Pragma" content="no-cache">
+  <title>登录 - ERP SAP S4 HANA 上线模拟演练系统</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📊</text></svg>">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-container {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 440px;
+      padding: 40px;
+    }
+    .login-header { text-align: center; margin-bottom: 30px; }
+    .login-logo { font-size: 4rem; margin-bottom: 15px; }
+    .login-title { font-size: 1.5rem; font-weight: 600; color: #1a73e8; margin-bottom: 8px; }
+    .login-subtitle { color: #666; font-size: 0.9rem; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-weight: 500; margin-bottom: 8px; color: #333; }
+    .form-group input { width: 100%; padding: 12px 16px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 14px; transition: border-color 0.2s; }
+    .form-group input:focus { outline: none; border-color: #1a73e8; }
+    .btn-primary { width: 100%; padding: 14px; background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(26,115,232,0.4); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-guest { width: 100%; padding: 14px; background: white; color: #1a73e8; border: 2px solid #1a73e8; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-top: 12px; }
+    .btn-guest:hover { background: #e3f2fd; }
+    .lang-toggle { position: fixed; top: 16px; right: 16px; padding: 8px 14px; background: rgba(255,255,255,0.9); border: 1px solid #1a73e8; border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #1a73e8; cursor: pointer; transition: all 0.2s; z-index: 100; }
+    .lang-toggle:hover { background: #e3f2fd; }
+    .tab-bar { display: flex; border-bottom: 2px solid #e0e0e0; margin-bottom: 20px; }
+    .tab-btn { flex: 1; padding: 12px; border: none; background: none; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+    .tab-btn.active { color: #1a73e8; border-bottom: 2px solid #1a73e8; margin-bottom: -2px; }
+    .tab-btn:not(.active) { color: #999; }
+    .alert { padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none; }
+    .alert-error { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+    .alert-success { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+    .tips-box { margin-top: 20px; padding: 15px; background: #f5f5f5; border-radius: 8px; font-size: 0.85rem; color: #666; }
+    .tips-box h4 { font-size: 0.9rem; margin-bottom: 8px; color: #333; }
+    .tips-box ul { margin-left: 18px; }
+    .tips-box li { margin-bottom: 4px; }
+  </style>
+</head>
+<body>
+  <button class="lang-toggle" id="langToggle" onclick="Locale.toggle()">🌐 <span id="langLabel">EN</span></button>
+  <div class="login-container">
+    <div class="login-header">
+      <div class="login-logo">🏢</div>
+      <h1 class="login-title" data-i18n="appTitle">ERP SAP S4 HANA 上线模拟演练系统</h1>
+      <p class="login-subtitle" data-i18n="appSubtitle">企业级项目仓库化管理平台</p>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <!-- Tab 切换 -->
+    <div class="tab-bar">
+      <button class="tab-btn active" id="tabSignIn" onclick="switchTab('signIn')" data-i18n="signInTab">邮箱登录</button>
+      <button class="tab-btn" id="tabSignUp" onclick="switchTab('signUp')" data-i18n="signUpTab">邮箱注册</button>
+    </div>
+
+    <!-- 登录表单 -->
+    <div id="signInForm">
+      <div class="form-group">
+        <label for="loginEmail" data-i18n="loginEmail">邮箱</label>
+        <input type="email" id="loginEmail" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label for="loginPassword" data-i18n="loginPassword">密码</label>
+        <input type="password" id="loginPassword" placeholder="输入密码">
+      </div>
+      <div id="loginError" class="alert alert-error"></div>
+      <button class="btn-primary" onclick="handleSignIn()" data-i18n="loginBtn">登 录</button>
+    </div>
+
+    <!-- 注册表单 -->
+    <div id="signUpForm" style="display:none;">
+      <div class="form-group">
+        <label for="registerEmail" data-i18n="registerEmail">邮箱</label>
+        <input type="email" id="registerEmail" placeholder="your@email.com">
+      </div>
+      <div class="form-group">
+        <label for="registerPassword" data-i18n="registerPassword">密码（至少 6 位）</label>
+        <input type="password" id="registerPassword" placeholder="设置密码">
+      </div>
+      <div id="registerError" class="alert alert-error"></div>
+      <button class="btn-primary" onclick="handleSignUp()" data-i18n="registerBtn">注 册</button>
+      <p style="color:#999;font-size:0.8rem;margin-top:10px;text-align:center;" data-i18n="registerAutoLogin">注册后自动登录</p>
+    </div>
+
+    <!-- 游客入口 -->
+    <button class="btn-guest" onclick="handleGuestLogin()" data-i18n="guestBtn">🚀 快速体验（无需注册）</button>
+
+    <div class="tips-box">
+      <h4 data-i18n="usageGuide">💡 使用说明</h4>
+      <ul>
+        <li><strong data-i18n="usageGuest">快速体验</strong>：<span data-i18n="usageGuestDesc">直接进入，可体验第 1 章全部内容</span></li>
+        <li><strong data-i18n="usageRegister">注册账号</strong>：<span data-i18n="usageRegisterDesc">解锁全部 6 章 + AI 文档生成 + 云端同步</span></li>
+        <li data-i18n="usageStorage">每个项目独立存储，互不干扰</li>
+        <li data-i18n="usageClone">支持项目克隆、导出功能</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 先加载 locale.js -->
+  <script src="scripts/locale.js?v=62"></script>
+  <!-- Supabase 认证（零 CDN 依赖，直接用 REST API） -->
+  <script src="scripts/auth.js?v=26"></script>
+
+  <script>
+    // 检查 localStorage
+    let localStorageAvailable = true;
+    try {
+      localStorage.setItem('test', '1');
+      localStorage.removeItem('test');
+    } catch (e) {
+      localStorageAvailable = false;
+      showAlert(typeof Locale !== 'undefined' ? Locale.t('msgNoLocalStorage') : 'localStorage 不可用，请使用本地服务器访问', 'error');
+    }
+
+    // 检查是否已登录
+    const existingUser = localStorageAvailable ? localStorage.getItem('erpSimulationUser') : null;
+    if (existingUser) {
+      console.log('[login.html] 发现已登录用户，跳转到 project-list.html');
+      window.location.replace('project-list.html?_=' + Date.now());
+    }
+
+    // Tab 切换
+    function switchTab(tab) {
+      const signInForm = document.getElementById('signInForm');
+      const signUpForm = document.getElementById('signUpForm');
+      const tabSignIn = document.getElementById('tabSignIn');
+      const tabSignUp = document.getElementById('tabSignUp');
+
+      if (tab === 'signIn') {
+        signInForm.style.display = 'block';
+        signUpForm.style.display = 'none';
+        tabSignIn.className = 'tab-btn active';
+        tabSignUp.className = 'tab-btn';
+      } else {
+        signInForm.style.display = 'none';
+        signUpForm.style.display = 'block';
+        tabSignUp.className = 'tab-btn active';
+        tabSignIn.className = 'tab-btn';
+      }
+
+      // 隐藏错误信息
+      document.getElementById('loginError').style.display = 'none';
+      document.getElementById('registerError').style.display = 'none';
+    }
+
+    // 处理邮箱登录
+    async function handleSignIn() {
+      const email = document.getElementById('loginEmail').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+
+      if (!email || !password) {
+        errorEl.textContent = typeof Locale !== 'undefined' ? Locale.t('msgSignInEnter') : '请输入邮箱和密码';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      errorEl.style.display = 'none';
+      console.log('[login.html] 开始登录，调用 AuthService.signInWithEmail');
+      const result = await AuthService.signInWithEmail(email, password);
+      console.log('[login.html] signInWithEmail 结果:', result);
+
+      if (result.success) {
+        console.log('[login.html] 登录成功，准备跳转');
+        showAlert(typeof Locale !== 'undefined' ? Locale.t('msgSignInSuccess') : '登录成功，正在跳转...', 'success');
+        setTimeout(() => {
+          console.log('[login.html] 执行跳转');
+          window.location.replace('project-list.html?_=' + Date.now());
+        }, 1000);
+      } else {
+        console.error('[login.html] 登录失败:', result.error);
+        errorEl.textContent = result.error || (typeof Locale !== 'undefined' ? Locale.t('msgSignInFail') : '登录失败');
+        errorEl.style.display = 'block';
+      }
+    }
+
+    // 处理邮箱注册
+    async function handleSignUp() {
+      const email = document.getElementById('registerEmail').value.trim();
+      const password = document.getElementById('registerPassword').value;
+      const errorEl = document.getElementById('registerError');
+
+      if (!email || !password) {
+        errorEl.textContent = typeof Locale !== 'undefined' ? Locale.t('msgSignUpEnter') : '请输入邮箱和密码';
+        errorEl.style.display = 'block';
+        return;
+      }
+      if (password.length < 6) {
+        errorEl.textContent = typeof Locale !== 'undefined' ? Locale.t('msgSignUpPwdLen') : '密码至少 6 位';
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      errorEl.style.display = 'none';
+      const result = await AuthService.signUpWithEmail(email, password);
+
+      if (result.success) {
+        showAlert(typeof Locale !== 'undefined' ? Locale.t('msgSignUpSuccess') : '注册成功，正在跳转...', 'success');
+        setTimeout(() => { window.location.replace('project-list.html?_=' + Date.now()); }, 1000);
+      } else {
+        errorEl.textContent = result.error || (typeof Locale !== 'undefined' ? Locale.t('msgSignUpFail') : '注册失败');
+        errorEl.style.display = 'block';
+      }
+    }
+
+    // 游客快速体验
+    function handleGuestLogin() {
+      const name = prompt(typeof Locale !== 'undefined' ? Locale.t('guestPrompt') : '请输入你的称呼（可选）：', typeof Locale !== 'undefined' ? Locale.t('guestDefault') : '访客');
+      const guest = AuthService.quickLogin(name || (typeof Locale !== 'undefined' ? Locale.t('guestDefault') : '访客'));
+      // 同步设置 erpSimulationCurrentUser（project-list.html 的 fallback 检查需要此 key）
+      localStorage.setItem('erpSimulationCurrentUser', JSON.stringify(guest));
+
+      showAlert(typeof Locale !== 'undefined' ? Locale.t('guestWelcome') : '欢迎！正在进入系统...', 'success');
+      setTimeout(() => {
+        window.location.replace('project-list.html?_=' + Date.now());
+      }, 800);
+    }
+
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = 'alert alert-' + type;
+      alertBox.style.display = 'block';
+      if (type === 'success') {
+        setTimeout(() => { alertBox.style.display = 'none'; }, 2000);
+      }
+    }
+  </script>
+</body>
+</html>

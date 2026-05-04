@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>项目空间 - ERP SAP S4 HANA 上线模拟演练系统</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📊</text></svg>">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/themes.css">
+  <link rel="stylesheet" href="styles/project-styles.css?v=53">
+</head>
+<body>
+  <div class="app-container">
+    <!-- 顶部导航栏 -->
+    <header class="header">
+      <div class="header-top">
+        <div class="header-title">
+          <span class="logo">🏢</span>
+          <span id="projectNameDisplay">ERP SAP S4 HANA 上线模拟演练系统</span>
+        </div>
+        <div class="header-actions">
+          <a href="project-list.html" class="btn-ai-config" data-i18n="btnProjectList">📋 项目列表</a>
+          <button class="btn-theme" id="langToggle" onclick="Locale.toggle()" title="切换语言" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);">🌐 EN</button>
+          <div class="theme-switcher">
+            <button class="btn-theme" id="themeToggle" title="切换主题" data-i18n="btnTheme">🎨 主题</button>
+            <div class="theme-dropdown" id="themeDropdown">
+              <div class="theme-option active" data-theme="default">
+                <span class="theme-color-preview blue"></span>
+                <span class="theme-option-name" data-i18n="themeDefault">企业蓝</span>
+              </div>
+              <div class="theme-option" data-theme="darkgray">
+                <span class="theme-color-preview darkgray"></span>
+                <span class="theme-option-name" data-i18n="themeDarkgray">深空灰</span>
+              </div>
+              <div class="theme-option" data-theme="green">
+                <span class="theme-color-preview green"></span>
+                <span class="theme-option-name" data-i18n="themeGreen">清新绿</span>
+              </div>
+            </div>
+          </div>
+          <span id="userStatusArea" style="color:rgba(255,255,255,0.8);font-size:0.85rem;display:flex;align-items:center;gap:8px;">
+            <span id="userDisplayName" data-i18n="userGuest">游客</span>
+            <button class="btn-theme" id="btnLogin" onclick="handleLoginAction()" style="background:rgba(255,255,255,0.2);border:1px solid rgba(255,255,255,0.3);" data-i18n="btnLogin">登录</button>
+          </span>
+        </div>
+      </div>
+
+      <!-- 进度条 + 操作按钮 -->
+      <div class="progress-section" style="background: rgba(255,255,255,0.1); padding: 10px 0; display: flex; align-items: center; gap: 12px;">
+        <span class="progress-label" style="color: white;" data-i18n="progLabel">项目进度</span>
+        <div class="progress-track" style="max-width: 260px; background: rgba(255,255,255,0.2); flex-shrink: 0;">
+          <div class="progress-fill" id="totalProgress" style="width: 0%"></div>
+        </div>
+        <span class="progress-percent" id="progressPercent" style="color: white;">0%</span>
+        <span class="progress-label" style="color: rgba(255,255,255,0.8);">
+          <span data-i18n="progCompleted">已完成</span> <span id="completedTasks">0</span> / <span id="totalTasks">0</span> <span data-i18n="progTasks">任务</span>
+        </span>
+        <div style="flex:1;"></div>
+        <button class="btn-theme" onclick="toggleProjectPanel()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);" data-i18n="btnDirectory">📁 目录</button>
+        <button class="btn-theme" onclick="toggleProjectInfo()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);" data-i18n="btnInfo">ℹ️ 信息</button>
+        <button class="btn-theme" onclick="exportAllDeliverables()" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);" data-i18n="btnExport">📦 导出文档</button>
+        <span id="saveLocationStatus" style="color:rgba(255,255,255,0.7);font-size:0.8rem;"></span>
+      </div>
+    </header>
+
+    <!-- 主体内容区 -->
+    <div class="main-content" style="grid-template-columns: 260px 1fr 320px;">
+      <!-- 左侧导航栏 - 章节列表 -->
+      <aside class="sidebar-nav">
+        <h2 class="sidebar-title" data-i18n="sideChapters">📚 实施阶段</h2>
+        <div class="chapter-list" id="chapterList">
+          <!-- 由 JavaScript 动态生成 -->
+        </div>
+
+        <h2 class="sidebar-title" style="margin-top: 25px;" data-i18n="sideFolders">📁 项目目录</h2>
+        <div class="folder-tree" id="folderTree">
+          <!-- 由 JavaScript 动态生成 -->
+        </div>
+      </aside>
+
+      <!-- 中间内容区 -->
+      <main class="content-area" style="flex: 1; overflow-y: auto;">
+        <!-- 章节头部 -->
+        <div class="chapter-header" id="chapterHeader">
+          <!-- 由 JavaScript 动态生成 -->
+        </div>
+
+        <!-- 任务列表 -->
+        <section class="tasks-section">
+          <h3 class="section-title">
+            <span>📝</span> <span data-i18n="secTasks">任务清单</span>
+          </h3>
+          <div class="task-list" id="taskList">
+            <!-- 由 JavaScript 动态生成 -->
+          </div>
+        </section>
+      </main>
+
+      <!-- 右侧文档区 -->
+      <aside class="documents-panel">
+        <h2 class="panel-title">
+          <span>📄</span> <span data-i18n="secDocs">交付物文档</span>
+        </h2>
+        <div class="document-list" id="documentList">
+          <!-- 由 JavaScript 动态生成 -->
+        </div>
+
+        <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e0e0e0;">
+          <h2 class="panel-title" style="font-size: 0.95rem;">
+            <span>📂</span> <span data-i18n="secFolderFiles">当前文件夹文件</span>
+          </h2>
+          <div class="file-list" id="currentFolderFiles">
+            <!-- 当前文件夹的文件列表 -->
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- 项目信息面板 -->
+  <div class="project-info-panel" id="projectInfoPanel">
+    <div class="project-info-header">
+      <span class="project-info-title" data-i18n="infoTitle">项目信息</span>
+      <button class="btn-panel-close" onclick="toggleProjectInfo()">&times;</button>
+    </div>
+    <div class="project-info-body" id="projectInfoBody">
+      <!-- 由 JavaScript 动态生成 -->
+    </div>
+    <div class="project-info-footer">
+      <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <button class="btn btn-primary" onclick="saveProgress()" style="flex: 1;" data-i18n="btnSave">💾 保存进度</button>
+        <button class="btn btn-secondary" onclick="resetProject()" style="flex: 1;" data-i18n="btnReset">🔄 重置</button>
+        <button class="btn btn-primary" onclick="exportProject()" style="flex: 1;" data-i18n="btnExportProject">📤 导出</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 任务操作模态框 -->
+  <div class="modal-overlay" id="taskModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="taskModalTitle" data-i18n="taskModalTitle">任务详情</h3>
+        <button class="btn-close" onclick="closeTaskModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="task-operation">
+          <div class="task-detail-section">
+            <div class="task-detail-row">
+              <span class="task-detail-label" data-i18n="taskDesc">任务描述</span>
+            </div>
+            <p id="taskModalDescription" style="color: var(--text-secondary); margin-top: 8px;"></p>
+          </div>
+
+          <div class="task-detail-section">
+            <div class="task-detail-row">
+              <span class="task-detail-label" data-i18n="taskRisk">风险等级</span>
+              <span class="task-detail-value" id="taskModalRisk"></span>
+            </div>
+            <div class="task-detail-row">
+              <span class="task-detail-label" data-i18n="taskDoc">产出文档</span>
+              <span class="task-detail-value" id="taskModalDocument"></span>
+            </div>
+            <div class="task-detail-row">
+              <span class="task-detail-label" data-i18n="taskFolder">归档目录</span>
+              <span class="task-detail-value" id="taskModalFolder"></span>
+            </div>
+          </div>
+
+          <div class="operation-section" id="operationSection">
+            <h4 style="margin-bottom: 12px;" data-i18n="opHeading">请选择操作方式</h4>
+
+            <div class="operation-option" onclick="selectOperation('manual')" id="op-manual">
+              <span class="operation-icon">✍️</span>
+              <div class="operation-info">
+                <div class="operation-title" data-i18n="opManual">手动完成</div>
+                <div class="operation-desc" data-i18n="opManualDesc">标记任务为已完成，生成标准文档模板</div>
+              </div>
+            </div>
+
+            <div class="operation-option" onclick="selectOperation('ai')" id="op-ai">
+              <span class="operation-icon">🤖</span>
+              <div class="operation-info">
+                <div class="operation-title" data-i18n="opAI">AI 生成</div>
+                <div class="operation-desc" data-i18n="opAIDesc">调用 AI 生成定制化文档内容</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeTaskModal()" data-i18n="btnCancel">取消</button>
+        <button class="btn btn-primary" id="btnCompleteTask" disabled data-i18n="btnComplete">完成任务</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 文档预览模态框 -->
+  <div class="modal-overlay" id="documentModal">
+    <div class="modal" style="max-width: 1000px; height: 85vh;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="documentModalTitle" data-i18n="docModalTitle">文档预览</h3>
+        <button class="btn-close" onclick="closeDocumentModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;">
+        <div class="document-preview" id="documentContent">
+          <!-- 文档内容由 JavaScript 动态生成 -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="copyMarkdown()" data-i18n="btnCopy">📋 复制源码</button>
+        <button class="btn btn-secondary" onclick="exportMarkdownFile()" data-i18n="btnExportMD">📝 导出 MD</button>
+        <button class="btn btn-secondary" onclick="exportHtmlFile()" data-i18n="btnExportHTML">📄 导出 HTML</button>
+        <button class="btn btn-primary" onclick="closeDocumentModal()" data-i18n="btnClose">关闭</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 变更管理模态框 -->
+  <div class="modal-overlay" id="changeModal">
+    <div class="modal change-modal">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="changeTitle">⚠️ 变更请求</h3>
+        <button class="btn-close" onclick="closeChangeModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="change-alert">
+          <div class="change-alert-title" data-i18n="changeAlert">项目发生变更</div>
+          <div class="change-alert-desc" id="changeAlertDesc"></div>
+        </div>
+
+        <div class="change-process">
+          <div class="change-step" id="changeStep1">
+            <div class="change-step-icon">1</div>
+            <div class="change-step-name" data-i18n="changeStep1">变更请求</div>
+          </div>
+          <div class="change-step" id="changeStep2">
+            <div class="change-step-icon">2</div>
+            <div class="change-step-name" data-i18n="changeStep2">影响分析</div>
+          </div>
+          <div class="change-step" id="changeStep3">
+            <div class="change-step-icon">3</div>
+            <div class="change-step-name" data-i18n="changeStep3">变更审批</div>
+          </div>
+          <div class="change-step" id="changeStep4">
+            <div class="change-step-icon">4</div>
+            <div class="change-step-name" data-i18n="changeStep4">变更执行</div>
+          </div>
+          <div class="change-step" id="changeStep5">
+            <div class="change-step-icon">5</div>
+            <div class="change-step-name" data-i18n="changeStep5">变更验证</div>
+          </div>
+          <div class="change-step" id="changeStep6">
+            <div class="change-step-icon">6</div>
+            <div class="change-step-name" data-i18n="changeStep6">关闭确认</div>
+          </div>
+        </div>
+
+        <div class="change-impact">
+          <div class="change-impact-title" data-i18n="changeImpact">变更影响评估</div>
+          <div class="change-impact-item">
+            <span data-i18n="changeSchedule">进度影响:</span>
+            <span id="changeImpactSchedule" style="color: var(--danger-color);"></span>
+          </div>
+          <div class="change-impact-item">
+            <span data-i18n="changeCost">成本影响:</span>
+            <span id="changeImpactCost" style="color: var(--danger-color);"></span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeChangeModal()" data-i18n="btnDefer">暂缓处理</button>
+        <button class="btn btn-primary" id="btnApproveChange" onclick="approveChange()" data-i18n="btnApprove">批准变更</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 注册引导对话框 -->
+  <div class="modal-overlay" id="registerModal" style="display:none;">
+    <div class="modal" style="max-width:480px;">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="registerModalTitle">🎉 精彩才刚刚开始</h3>
+        <button class="btn-close" onclick="AuthService.closeRegisterModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;padding:30px 20px;">
+        <div style="font-size:3rem;margin-bottom:15px;">🚀</div>
+        <h3 style="margin-bottom:10px;color:var(--primary-color);" data-i18n="registerHeading">你已完成第一章体验</h3>
+        <p style="color:var(--text-secondary);line-height:1.6;margin-bottom:20px;" data-i18n="registerDesc">
+          注册账号解锁全部 <strong>6 章内容</strong>、<strong>AI 智能文档生成</strong>、<strong>项目进度云端保存</strong>。
+        </p>
+        <div style="display:flex;gap:10px;margin-bottom:15px;">
+          <button class="btn btn-primary" onclick="AuthService.closeRegisterModal();AuthService.showLoginModal();" style="flex:1;" data-i18n="btnRegisterLogin">注册 / 登录</button>
+          <button class="btn btn-secondary" onclick="AuthService.closeRegisterModal()" style="flex:1;" data-i18n="btnContinueCh1">继续体验 Ch.1</button>
+        </div>
+        <p style="color:#999;font-size:0.8rem;" data-i18n="registerFooter">免费体验 Ch.1 全部内容，无需注册</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 付费升级模态框 -->
+  <div class="modal-overlay" id="upgradeModal" style="display:none;">
+    <div class="modal" style="max-width:520px;">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="upgradeTitle">💎 升级付费用户</h3>
+        <button class="btn-close" onclick="closeUpgradeModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <!-- 产品卡片 -->
+        <div style="background:linear-gradient(135deg, #667eea 0%, #764ba2 100%);color:white;padding:20px;border-radius:12px;margin-bottom:20px;">
+          <div style="font-size:1.5rem;margin-bottom:10px;" data-i18n="upgradeProduct">🤖 AI 文档生成套件</div>
+          <div style="font-size:2rem;font-weight:bold;margin-bottom:5px;" data-i18n="upgradePrice">￥99</span> <span style="font-size:0.9rem;font-weight:normal;" data-i18n="upgradePriceUnit">/ 项目</span></div>
+          <div style="font-size:0.85rem;opacity:0.9;" data-i18n="upgradeTagline">一次性付费，永久使用</div>
+        </div>
+
+        <!-- 功能清单 -->
+        <div style="margin-bottom:20px;">
+          <div style="margin-bottom:12px;">
+            <span style="color:#28a745;margin-right:8px;">✅</span>
+            <span data-i18n="upgradeF1">37 种 ERP 实施标准文档不限量生成</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <span style="color:#28a745;margin-right:8px;">✅</span>
+            <span data-i18n="upgradeF2">根据项目背景智能定制内容</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <span style="color:#28a745;margin-right:8px;">✅</span>
+            <span data-i18n="upgradeF3">支持导出 Word/PDF 格式</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <span style="color:#28a745;margin-right:8px;">✅</span>
+            <span data-i18n="upgradeF4">完整的标准文档模板（非简化版）</span>
+          </div>
+          <div style="margin-bottom:12px;">
+            <span style="color:#28a745;margin-right:8px;">✅</span>
+            <span data-i18n="upgradeF5">AI 智能文档生成（通义千问）</span>
+          </div>
+        </div>
+
+        <!-- 支付方式 -->
+        <div style="border:1px solid #e0e0e0;border-radius:8px;padding:15px;margin-bottom:15px;">
+          <div style="font-weight:600;margin-bottom:10px;" data-i18n="payMethod">选择支付方式</div>
+          <div style="display:flex;gap:10px;">
+            <button style="flex:1;padding:10px;border:2px solid #07c160;border-radius:6px;background:white;color:#07c160;font-weight:500;cursor:pointer;">
+              <span data-i18n="payWechat">💬 微信支付</span>
+            </button>
+            <button style="flex:1;padding:10px;border:2px solid #1677ff;border-radius:6px;background:white;color:#1677ff;font-weight:500;cursor:pointer;">
+              <span data-i18n="payAlipay">💳 支付宝</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="background:#f5f7fa;padding:12px;border-radius:8px;font-size:0.85rem;color:#666;">
+          <span data-i18n="payNote">🔒 支付后当前项目永久解锁，支持发票开具</span>
+        </div>
+      </div>
+      <div class="modal-footer" style="display:flex;gap:10px;">
+        <button class="btn btn-secondary" onclick="closeUpgradeModal()" style="flex:1;" data-i18n="btnNoThanks">暂不需要</button>
+        <button class="btn btn-primary" onclick="startPayment()" style="flex:1;" data-i18n="btnPayNow">立即支付</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 登录对话框 -->
+  <div class="modal-overlay" id="loginModal" style="display:none;">
+    <div class="modal" style="max-width:420px;">
+      <div class="modal-header">
+        <h3 class="modal-title" data-i18n="authModalTitle">🔐 登录 / 注册</h3>
+        <button class="btn-close" onclick="AuthService.closeLoginModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:20px;">
+        <!-- Tab 切换 -->
+        <div style="display:flex;gap:0;margin-bottom:20px;border-bottom:2px solid #e0e0e0;">
+          <button class="login-tab active" id="tabSignIn" onclick="switchLoginTab('signIn')" style="flex:1;padding:10px;border:none;background:none;font-size:0.95rem;font-weight:600;color:var(--primary-color);border-bottom:2px solid var(--primary-color);margin-bottom:-2px;cursor:pointer;" data-i18n="authSignInTab">登录</button>
+          <button class="login-tab" id="tabSignUp" onclick="switchLoginTab('signUp')" style="flex:1;padding:10px;border:none;background:none;font-size:0.95rem;color:#999;cursor:pointer;" data-i18n="authSignUpTab">注册</button>
+        </div>
+
+        <!-- 登录表单 -->
+        <div id="signInForm">
+          <form onsubmit="return false;">
+            <div style="margin-bottom:15px;">
+              <label style="display:block;margin-bottom:5px;font-size:0.9rem;color:#666;" data-i18n="loginEmail">邮箱</label>
+              <input type="email" id="loginEmail" placeholder="your@email.com" autocomplete="username" style="width:100%;padding:10px;border:1px solid #d0d0d0;border-radius:6px;font-size:14px;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label style="display:block;margin-bottom:5px;font-size:0.9rem;color:#666;" data-i18n="loginPassword">密码</label>
+              <input type="password" id="loginPassword" placeholder="输入密码" autocomplete="current-password" style="width:100%;padding:10px;border:1px solid #d0d0d0;border-radius:6px;font-size:14px;">
+            </div>
+            <div id="loginError" style="color:#dc3545;font-size:0.85rem;margin-bottom:10px;display:none;"></div>
+            <button class="btn btn-primary" onclick="handleSignIn()" style="width:100%;" data-i18n="loginBtn">登录</button>
+          </form>
+        </div>
+
+        <!-- 注册表单 -->
+        <div id="signUpForm" style="display:none;">
+          <form onsubmit="return false;">
+            <div style="margin-bottom:15px;">
+              <label style="display:block;margin-bottom:5px;font-size:0.9rem;color:#666;" data-i18n="loginEmail">邮箱</label>
+              <input type="email" id="registerEmail" placeholder="your@email.com" autocomplete="username" style="width:100%;padding:10px;border:1px solid #d0d0d0;border-radius:6px;font-size:14px;">
+            </div>
+            <div style="margin-bottom:15px;">
+              <label style="display:block;margin-bottom:5px;font-size:0.9rem;color:#666;" data-i18n="registerPassword">密码（至少 6 位）</label>
+              <input type="password" id="registerPassword" placeholder="设置密码" autocomplete="new-password" style="width:100%;padding:10px;border:1px solid #d0d0d0;border-radius:6px;font-size:14px;">
+            </div>
+            <div id="registerError" style="color:#dc3545;font-size:0.85rem;margin-bottom:10px;display:none;"></div>
+            <button class="btn btn-primary" onclick="handleSignUp()" style="width:100%;" data-i18n="registerBtn">注册</button>
+            <p style="color:#999;font-size:0.8rem;margin-top:10px;" data-i18n="registerAutoLogin">注册后自动登录</p>
+          </form>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="AuthService.closeLoginModal()" data-i18n="btnCancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 提示词编辑对话框 -->
+  <div class="modal-overlay" id="promptEditorModal" style="display:none;">
+    <div class="modal" style="max-width:760px;max-height:88vh;">
+      <div class="modal-header">
+        <h3 class="modal-title"><span data-i18n="promptTitle">✏️ AI 文档生成 —</span> <span id="peDocName"></span></h3>
+        <button class="btn-close" onclick="PromptEditor.cancel()">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y:auto;max-height:calc(88vh - 120px);">
+
+        <!-- Tab 切换 -->
+        <div class="pe-tabs">
+          <button class="pe-tab active" id="peTab1" onclick="PromptEditor.switchTab('structured')" data-i18n="promptTabStruct">📋 结构化编辑</button>
+          <button class="pe-tab" id="peTab2" onclick="PromptEditor.switchTab('text')" data-i18n="promptTabPrompt">📝 提示词编辑</button>
+        </div>
+
+        <!-- Tab 1: 结构化编辑 -->
+        <div id="peContent-structured">
+          <!-- 项目基本信息（只读） -->
+          <div class="pe-section">
+            <div class="pe-section-title" data-i18n="promptProjectInfo">🏢 项目基本信息</div>
+            <div class="pe-project-info">
+              <div class="pe-info-grid">
+                <div class="pe-info-item"><span class="pe-info-label" data-i18n="infoCode">项目编号</span><span id="peProjCode"></span></div>
+                <div class="pe-info-item"><span class="pe-info-label" data-i18n="infoName">项目名称</span><span id="peProjName"></span></div>
+                <div class="pe-info-item"><span class="pe-info-label" data-i18n="infoCustomer">客户/公司</span><span id="peProjCustomer"></span></div>
+                <div class="pe-info-item"><span class="pe-info-label" data-i18n="infoPM">项目经理</span><span id="peProjPM"></span></div>
+                <div class="pe-info-item"><span class="pe-info-label" data-i18n="infoStart">开始日期</span><span id="peProjStart"></span></div>
+                <div class="pe-info-item"><span class="pe-info-label" data-i18n="infoGoLive">计划上线</span><span id="peProjGoLive"></span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 项目背景信息（可编辑） -->
+          <div class="pe-section">
+            <div class="pe-section-title"><span data-i18n="promptBgTitle">📋 项目背景信息</span> <span class="pe-section-hint" data-i18n="promptBgHint">（选填，用于个性化文档内容）</span></div>
+            <div class="pe-field-row">
+              <div class="pe-field">
+                <label data-i18n="bgIndustry">行业类型</label>
+                <select id="peBgIndustry">
+                  <option value="" data-i18n="bgIndustryPlaceholder">请选择</option>
+                  <option value="manufacturing" data-i18n="bgIndustry_manufacturing">制造业</option>
+                  <option value="finance" data-i18n="bgIndustry_finance">金融</option>
+                  <option value="retail" data-i18n="bgIndustry_retail">零售</option>
+                  <option value="pharma" data-i18n="bgIndustry_pharma">医药</option>
+                  <option value="energy" data-i18n="bgIndustry_energy">能源</option>
+                  <option value="telecom" data-i18n="bgIndustry_telecom">通信</option>
+                  <option value="government" data-i18n="bgIndustry_government">政府</option>
+                  <option value="other" data-i18n="bgIndustry_other">其他</option>
+                </select>
+              </div>
+              <div class="pe-field">
+                <label data-i18n="bgSize">企业规模</label>
+                <select id="peBgSize">
+                  <option value="" data-i18n="bgSizePlaceholder">请选择</option>
+                  <option value="small" data-i18n="bgSize_small">小型（<100人）</option>
+                  <option value="medium" data-i18n="bgSize_medium">中型（100-1000人）</option>
+                  <option value="large" data-i18n="bgSize_large">大型（1000-5000人）</option>
+                  <option value="enterprise" data-i18n="bgSize_enterprise">超大型（5000+人）</option>
+                </select>
+              </div>
+            </div>
+            <div class="pe-field">
+              <label data-i18n="bgItLandscape">现有 IT 架构</label>
+              <input type="text" id="peBgIt" placeholder="如：SAP ECC 6.0、Oracle EBS、自研系统...">
+            </div>
+            <div class="pe-field-row">
+              <div class="pe-field">
+                <label data-i18n="bgPainPoints">企业痛点</label>
+                <textarea id="peBgPain" rows="2" placeholder="如：数据孤岛、流程不规范、报表效率低..."></textarea>
+              </div>
+              <div class="pe-field">
+                <label data-i18n="bgGoals">实施目标</label>
+                <textarea id="peBgGoals" rows="2" placeholder="如：统一数据平台、优化流程、提升效率..."></textarea>
+              </div>
+            </div>
+            <div class="pe-field">
+              <label data-i18n="bgModules">SAP 模块范围</label>
+              <input type="text" id="peBgModules" placeholder="如：FI, CO, MM, SD, PP（逗号分隔）">
+            </div>
+            <div class="pe-field">
+              <label data-i18n="bgOrgStructure">组织架构</label>
+              <input type="text" id="peBgOrg" placeholder="如：集团总部 + 3 个工厂 + 5 个销售公司">
+            </div>
+            <div class="pe-field">
+              <label data-i18n="bgMilestones">关键里程碑</label>
+              <input type="text" id="peBgMilestones" placeholder="如：2026Q1 蓝图确认，2026Q3 UAT，2027Q1 上线...">
+            </div>
+          </div>
+
+          <!-- 文档专用字段 -->
+          <div class="pe-section">
+            <div class="pe-section-title"><span data-i18n="promptExtraInfo">📌 文档补充信息</span> <span class="pe-section-hint" id="peSectionHint"></span></div>
+            <div id="peExtraFields"></div>
+          </div>
+
+          <!-- 格式风格 -->
+          <div class="pe-section">
+            <div class="pe-section-title" data-i18n="promptStyleSection">🎨 文档风格</div>
+            <div class="pe-field-row">
+              <div class="pe-field">
+                <label data-i18n="promptLangStyle">语言风格</label>
+                <select id="peStyle">
+                  <option value="" data-i18n="promptStyleDefault">默认</option>
+                  <option value="正式（详细完整）" data-i18n="promptStyleFormal">正式（详细完整）</option>
+                  <option value="简洁（重点突出）" data-i18n="promptStyleConcise">简洁（重点突出）</option>
+                  <option value="详细（尽可能丰富）" data-i18n="promptStyleDetailed">详细（尽可能丰富）</option>
+                </select>
+              </div>
+              <div class="pe-field">
+                <label data-i18n="promptExamples">是否需要示例数据</label>
+                <select id="peExamples">
+                  <option value="" data-i18n="promptStyleDefault">默认</option>
+                  <option value="需要示例数据" data-i18n="promptExamplesYes">需要</option>
+                  <option value="不需要示例数据" data-i18n="promptExamplesNo">不需要</option>
+                </select>
+              </div>
+              <div class="pe-field">
+                <label data-i18n="promptTables">是否需要表格</label>
+                <select id="peTables">
+                  <option value="" data-i18n="promptStyleDefault">默认</option>
+                  <option value="需要包含数据表格" data-i18n="promptTablesYes">需要表格</option>
+                  <option value="不需要表格" data-i18n="promptTablesNo">不需要</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- 补充说明 -->
+          <div class="pe-section">
+            <div class="pe-section-title"><span data-i18n="promptCustomTitle">💬 补充说明</span> <span class="pe-section-hint" data-i18n="promptCustomHint">（选填，任何想补充的）</span></div>
+            <div class="pe-field">
+              <textarea id="peCustomPrompt" rows="3" placeholder="如：重点突出 FI/CO 模块、客户是制造业、需要包含风险矩阵表..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: 提示词文本 -->
+        <div id="peContent-text" style="display:none;">
+          <div class="pe-prompt-editor-wrap">
+            <div class="pe-prompt-header">
+              <span style="font-size:0.88rem;font-weight:600;color:#444;" data-i18n="promptPreviewTitle">完整提示词（可直接编辑）</span>
+              <button class="btn btn-secondary" style="padding:4px 12px;font-size:0.82rem;" onclick="PromptEditor.rebuildPrompt()" data-i18n="promptRebuildBtn">🔄 重新从结构化数据生成</button>
+            </div>
+            <textarea id="pePromptPreview" rows="22" class="pe-prompt-textarea" spellcheck="false"></textarea>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="display:flex;gap:8px;">
+        <button class="btn btn-secondary" style="flex:1;" onclick="PromptEditor.resetAll()" data-i18n="btnReset">🔄 重置</button>
+        <button class="btn btn-secondary" style="flex:1;" onclick="PromptEditor.cancel()" data-i18n="btnCancel">取消</button>
+        <button class="btn btn-primary" style="flex:2;" id="btnPromptConfirm" data-i18n="btnConfirm">🤖 确认并生成</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script src="scripts/locale.js?v=62"></script>
+  <script src="scripts/auth.js?v=49"></script>
+  <script src="scripts/markdown-renderer.js?v=50"></script>
+  <script src="scripts/project-manager.js?v=49"></script>
+  <script src="scripts/document-file-store.js?v=49"></script>
+  <script src="scripts/document-generator.js?v=49"></script>
+  <script src="scripts/ai-service.js?v=49"></script>
+  <script src="scripts/prompt-editor.js?v=50"></script>
+  <script src="scripts/data.js?v=49"></script>
+  <script src="scripts/game-features.js?v=62"></script>
+  <script src="scripts/app.js?v=62"></script>
+  <script src="scripts/project-app.js?v=62"></script>
+
+  <!-- 付费升级相关函数 -->
+  <script>
+    function closeUpgradeModal() {
+      const modal = document.getElementById('upgradeModal');
+      if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+      }
+    }
+
+    function startPayment() {
+      // 记录支付成功（模拟）
+      if (typeof currentProjectId !== 'undefined' && currentProjectId) {
+        const paymentKey = 'erp_project_' + currentProjectId + '_payment';
+        localStorage.setItem(paymentKey, JSON.stringify({
+          purchased: true,
+          method: 'simulated',
+          amount: 99,
+          purchasedAt: new Date().toISOString(),
+          orderId: 'ORD_SIM_' + Date.now(),
+          productId: 'erp-ai-docs',
+          documentQuota: 37
+        }));
+      }
+
+      // 关闭升级弹窗
+      closeUpgradeModal();
+
+      // 提示模拟支付成功
+      alert('✅ 模拟支付成功！\n\n现在将模拟已经支付成功，跳转中...');
+
+      // 重新触发"完成任务"按钮（继续 AI 生成流程）
+      const btnComplete = document.getElementById('btnCompleteTask');
+      if (btnComplete) {
+        btnComplete.click();
+      }
+    }
+
+    // 暴露给全局使用
+    window.closeUpgradeModal = closeUpgradeModal;
+    window.startPayment = startPayment;
+  </script>
+</body>
+</html>

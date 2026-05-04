@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -X POST \"https://erp-ai-proxy.lh-jsus.workers.dev/generate\" -H \"Content-Type: application/json\" -d '{\"model\":\"qwen-turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"你好\"}],\"max_tokens\":10}')",
+      "Bash(curl -s --max-time 10 -X POST \"https://erp-ai-proxy.lh-jsus.workers.dev/generate\" -H \"Content-Type: application/json\" -d '{\"model\":\"qwen-turbo\",\"messages\":[{\"role\":\"user\",\"content\":\"你好\"}],\"max_tokens\":10}')",
+      "Bash(wc -l \"c:\\\\\\\\Users\\\\\\\\lh_js\\\\\\\\OneDrive\\\\\\\\Documents\\\\\\\\agent101toolkit\\\\\\\\claude-code\\\\\\\\tools\\\\\\\\windows\\\\\\\\erp-sap-s4-simulation-system\\\\\\\\scripts\\\\\\\\game-features.js\")"
+    ]
+  }
+}

@@ -1,0 +1,652 @@
+/* ============================================
+   ERP SAP S4 HANA 上线模拟演练系统
+   项目仓库化样式
+   ============================================ */
+
+/* 项目面板 */
+.project-panel {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+.project-panel-header {
+  background: linear-gradient(135deg, #1a73e8 0%, #0d47a1 100%);
+  color: white;
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.project-panel-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.project-panel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.project-panel-body {
+  padding: 16px 20px;
+}
+
+/* 目录树 */
+.folder-tree {
+  font-size: 0.9rem;
+  display: none;
+}
+.folder-tree.open {
+  display: block;
+}
+
+.folder-item {
+  margin-bottom: 4px;
+}
+
+.folder-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+
+.folder-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.folder-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.folder-name {
+  font-size: 0.9rem;
+  line-height: 1.3;
+  word-break: break-all;
+}
+
+.folder-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.folder-header:hover {
+  background: #e8f0fe;
+}
+
+.folder-header.active {
+  background: #1a73e8;
+  color: white;
+}
+
+.folder-header.chapter-linked {
+  border-left: 3px solid #1a73e8;
+  background: #e8f0fe;
+}
+
+.folder-header.chapter-linked:hover {
+  background: #d2e3fc;
+}
+
+.folder-count {
+  font-size: 0.8rem;
+  color: #666;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.folder-header.active .folder-name,
+.folder-header.active .folder-count {
+  color: white;
+}
+
+.folder-progress-track {
+  width: 60px;
+  height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.folder-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #22c55e);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+.folder-arrow {
+  margin-left: auto;
+  transition: transform 0.2s;
+}
+
+.folder-arrow.expanded {
+  transform: rotate(90deg);
+}
+
+.folder-children {
+  display: none;
+  padding-left: 20px;
+  margin-top: 4px;
+}
+
+.folder-children.expanded {
+  display: block;
+}
+
+/* 文件列表 */
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+}
+
+.file-item:hover {
+  background: #e8f0fe;
+}
+
+.file-item.active {
+  background: #1a73e8;
+  color: white;
+}
+
+.file-icon {
+  font-size: 1.1rem;
+}
+
+.file-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.file-item:hover .file-actions {
+  opacity: 1;
+}
+
+.btn-file-action {
+  width: 26px;
+  height: 26px;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+}
+
+.btn-file-action:hover {
+  background: #1a73e8;
+  border-color: #1a73e8;
+  color: white;
+}
+
+/* 进度条 */
+.progress-section {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 15px 20px;
+  background: #f8f9fa;
+  border-top: 1px solid #e0e0e0;
+}
+
+.progress-label {
+  font-size: 0.85rem;
+  color: #666;
+  white-space: nowrap;
+}
+
+.progress-track {
+  flex: 1;
+  height: 10px;
+  background: #e0e0e0;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80, #22c55e);
+  border-radius: 5px;
+  transition: width 0.3s ease;
+}
+
+.progress-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a73e8;
+  min-width: 50px;
+}
+
+/* 文档预览区 */
+.document-preview-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  overflow: hidden;
+}
+
+.document-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.document-toolbar-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.document-toolbar-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-toolbar {
+  padding: 8px 14px;
+  border: 1px solid #e0e0e0;
+  background: white;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.btn-toolbar:hover {
+  background: #f5f5f5;
+  border-color: #1a73e8;
+  color: #1a73e8;
+}
+
+.document-content {
+  padding: 30px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* Markdown 渲染样式 */
+.full-document {
+  font-family: "Times New Roman", serif;
+  line-height: 1.8;
+}
+
+.doc-header {
+  text-align: center;
+  border-bottom: 2px solid #333;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.doc-title {
+  font-size: 1.8rem;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #1a1a1a;
+}
+
+.doc-meta {
+  font-size: 0.9rem;
+  color: #666;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.doc-content {
+  margin-top: 30px;
+}
+
+.doc-h1 {
+  font-size: 1.6rem;
+  font-weight: bold;
+  margin-top: 30px;
+  margin-bottom: 18px;
+  color: #1a1a1a;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 10px;
+}
+
+.doc-h2 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-top: 25px;
+  margin-bottom: 15px;
+  color: #1a73e8;
+}
+
+.doc-h3 {
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-top: 20px;
+  margin-bottom: 12px;
+  color: #333;
+}
+
+.doc-h4 {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-top: 18px;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.doc-h5 {
+  font-size: 0.95rem;
+  font-weight: bold;
+  margin-top: 15px;
+  margin-bottom: 8px;
+}
+
+.doc-h6 {
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-top: 12px;
+  margin-bottom: 6px;
+}
+
+.doc-p {
+  margin-bottom: 15px;
+  text-align: justify;
+  color: #333;
+}
+
+.doc-ul, .doc-ol {
+  margin-bottom: 15px;
+  padding-left: 30px;
+}
+
+.doc-li {
+  margin-bottom: 8px;
+}
+
+.doc-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 0.95rem;
+}
+
+.doc-table th,
+.doc-table td {
+  border: 1px solid #d0d0d0;
+  padding: 12px;
+  text-align: left;
+}
+
+.doc-table th {
+  background: linear-gradient(135deg, #e8f0fe, #d0e0f8);
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.doc-table tr:nth-child(even) td {
+  background: #fafbfc;
+}
+
+.doc-table tr:hover td {
+  background: #f0f5ff;
+}
+
+.doc-quote {
+  border-left: 4px solid #1a73e8;
+  padding-left: 20px;
+  margin: 20px 0;
+  color: #555;
+  background: #f8f9fa;
+  padding: 15px 20px;
+  border-radius: 0 6px 6px 0;
+}
+
+.doc-pre {
+  background: #2d2d2d;
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 15px 0;
+}
+
+.doc-code {
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 13px;
+  color: #f8f8f2;
+  display: block;
+}
+
+.doc-ascii-art {
+  background: #f8f9fa;
+  padding: 16px;
+  border-radius: 6px;
+  overflow-x: auto;
+  margin: 15px 0;
+  font-family: Consolas, Monaco, 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: pre;
+  color: #333;
+  border-left: 3px solid #1a73e8;
+}
+
+.inline-code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: Consolas, Monaco, monospace;
+  font-size: 0.9em;
+  color: #e83e8c;
+}
+
+.doc-hr {
+  border: none;
+  border-top: 1px solid #e0e0e0;
+  margin: 25px 0;
+}
+
+.doc-link {
+  color: #1a73e8;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.doc-link:hover {
+  border-bottom-color: #1a73e8;
+}
+
+.doc-image {
+  max-width: 100%;
+  height: auto;
+  margin: 15px 0;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.doc-footer {
+  margin-top: 50px;
+  padding-top: 25px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.signature-block {
+  text-align: center;
+  width: 180px;
+}
+
+.signature-line {
+  border-top: 1px solid #333;
+  margin-top: 50px;
+  padding-top: 8px;
+  font-size: 0.9rem;
+}
+
+/* 项目信息面板 */
+.project-info-panel {
+  position: fixed;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 350px;
+  background: white;
+  box-shadow: -4px 0 20px rgba(0,0,0,0.1);
+  z-index: 1500;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.project-info-panel.open {
+  transform: translateX(0);
+}
+
+.project-info-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+.project-info-title {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.btn-panel-close {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  line-height: 1;
+}
+
+.project-info-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.info-section {
+  margin-bottom: 25px;
+}
+
+.info-section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+  font-size: 0.9rem;
+}
+
+.info-label {
+  color: #999;
+}
+
+.info-value {
+  color: #333;
+  font-weight: 500;
+}
+
+.project-info-footer {
+  padding: 16px 20px;
+  border-top: 1px solid #e0e0e0;
+  background: #f8f9fa;
+}
+
+/* 隐藏工具类 */
+.hidden {
+  display: none !important;
+}
+
+/* 响应式 */
+@media (max-width: 1200px) {
+  .project-info-panel {
+    width: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .project-info-panel {
+    width: 100%;
+  }
+}
+
+/* 打印样式 */
+@media print {
+  .project-panel,
+  .document-toolbar,
+  .sidebar-nav,
+  .navbar {
+    display: none !important;
+  }
+
+  .document-preview-container {
+    box-shadow: none;
+  }
+
+  .full-document {
+    font-size: 12px;
+  }
+}

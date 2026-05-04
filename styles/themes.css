@@ -1,0 +1,252 @@
+/* ============================================
+   ERP SAP S4 HANA 上线模拟演练系统
+   主题切换样式
+   包含：企业蓝（默认）、深空灰、清新绿
+   ============================================ */
+
+/* ============================================
+   深空灰主题
+   ============================================ */
+
+body.theme-darkgray {
+  --primary-color: #4a5568;
+  --primary-dark: #2d3748;
+  --primary-light: #718096;
+  --primary-bg: #e2e8f0;
+
+  --text-primary: #1a202c;
+  --text-secondary: #4a5568;
+  --text-muted: #a0aec0;
+  --border-color: #cbd5e0;
+  --bg-light: #f7fafc;
+  --bg-white: #ffffff;
+}
+
+body.theme-darkgray .header {
+  background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+}
+
+body.theme-darkgray .chapter-nav-item.active {
+  background: #e2e8f0;
+  border-color: #4a5568;
+}
+
+body.theme-darkgray .task-card.in-progress {
+  border-left-color: #4a5568;
+  background: #e2e8f0;
+}
+
+body.theme-darkgray .task-card.in-progress .task-status-dot {
+  background: #4a5568;
+}
+
+body.theme-darkgray .chapter-phase-badge {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+body.theme-darkgray .btn-preview {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+body.theme-darkgray .btn-preview:hover {
+  background: #4a5568;
+  color: white;
+}
+
+/* ============================================
+   清新绿主题
+   ============================================ */
+
+body.theme-green {
+  --primary-color: #059669;
+  --primary-dark: #047857;
+  --primary-light: #10b981;
+  --primary-bg: #d1fae5;
+
+  --text-primary: #064e3b;
+  --text-secondary: #059669;
+  --text-muted: #6ee7b7;
+  --border-color: #a7f3d0;
+  --bg-light: #ecfdf5;
+  --bg-white: #ffffff;
+}
+
+body.theme-green .header {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+body.theme-green .chapter-nav-item.active {
+  background: #d1fae5;
+  border-color: #059669;
+}
+
+body.theme-green .task-card.in-progress {
+  border-left-color: #059669;
+  background: #d1fae5;
+}
+
+body.theme-green .task-card.in-progress .task-status-dot {
+  background: #059669;
+  animation: pulse-green 1.5s infinite;
+}
+
+@keyframes pulse-green {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+body.theme-green .chapter-phase-badge {
+  background: #d1fae5;
+  color: #047857;
+}
+
+body.theme-green .btn-preview {
+  background: #d1fae5;
+  color: #059669;
+}
+
+body.theme-green .btn-preview:hover {
+  background: #059669;
+  color: white;
+}
+
+body.theme-green .doc-section-title {
+  color: #047857;
+}
+
+body.theme-green .doc-table th {
+  background: #d1fae5;
+}
+
+/* ============================================
+   主题切换器组件
+   ============================================ */
+
+.theme-switcher {
+  position: relative;
+  display: inline-block;
+}
+
+.theme-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-lg);
+  padding: var(--spacer-sm);
+  min-width: 150px;
+  display: none;
+  z-index: 1001;
+}
+
+.theme-dropdown.active {
+  display: block;
+}
+
+.theme-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacer-sm);
+  padding: var(--spacer-sm) var(--spacer-md);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.theme-option:hover {
+  background: var(--bg-light);
+}
+
+.theme-option.active {
+  background: var(--primary-bg);
+}
+
+.theme-color-preview {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+}
+
+.theme-color-preview.blue {
+  background: #1a73e8;
+}
+
+.theme-color-preview.darkgray {
+  background: #4a5568;
+}
+
+.theme-color-preview.green {
+  background: #059669;
+}
+
+.theme-option-name {
+  font-size: 0.85rem;
+  color: var(--text-primary);
+}
+
+/* ============================================
+   主题特定覆盖样式
+   ============================================ */
+
+/* 深空灰主题特殊样式 */
+body.theme-darkgray .task-risk.low {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+body.theme-darkgray .task-risk.medium {
+  background: #feebc8;
+  color: #7c2d12;
+}
+
+body.theme-darkgray .task-risk.high {
+  background: #fed7d7;
+  color: #9b2c2c;
+}
+
+/* 清新绿主题特殊样式 */
+body.theme-green .task-risk.low {
+  background: #a7f3d0;
+  color: #065f46;
+}
+
+body.theme-green .task-risk.medium {
+  background: #fde68a;
+  color: #92400e;
+}
+
+body.theme-green .task-risk.high {
+  background: #fca5a5;
+  color: #991b1b;
+}
+
+/* ============================================
+   打印样式
+   ============================================ */
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .header,
+  .sidebar-nav,
+  .documents-panel,
+  .btn,
+  .modal-overlay {
+    display: none !important;
+  }
+
+  .main-content {
+    display: block;
+  }
+
+  .content-area {
+    box-shadow: none;
+    padding: 0;
+  }
+}
