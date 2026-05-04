@@ -158,7 +158,7 @@ function showChapter(chapterId) {
 
   // 检查是否已解锁
   if (chapter.locked) {
-    alert(typeof Locale !== 'undefined' ? Locale.t('lockedChapterMsg') : '请先完成前置章节以解锁本章节');
+    alert(typeof Locale !== 'undefined' ? Locale.t('lockedChapterMsg') : '请先完成前置阶段以解锁本阶段');
     return;
   }
 

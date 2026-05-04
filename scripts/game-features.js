@@ -152,8 +152,8 @@ const CharacterGuide = {
     nextTask: typeof Locale !== 'undefined' ? Locale.t('guideNextTask') : '当前任务：{taskName}',
     parallel: typeof Locale !== 'undefined' ? Locale.t('guideParallel') : '你可以并行做 {taskName}，节省时间 ⚡',
     critical: typeof Locale !== 'undefined' ? Locale.t('guideCritical') : '⚠️ 这个任务在关键路径上，别拖延',
-    locked: typeof Locale !== 'undefined' ? Locale.t('guideLocked') : '完成前置章节才能解锁本章节 🔒',
-    chapterComplete: typeof Locale !== 'undefined' ? Locale.t('guideChapterComplete') : '章节完成！准备进入下一阶段 🎯',
+    locked: typeof Locale !== 'undefined' ? Locale.t('guideLocked') : '完成前置阶段才能解锁本阶段 🔒',
+    chapterComplete: typeof Locale !== 'undefined' ? Locale.t('guideChapterComplete') : '阶段完成！准备进入下一阶段 🎯',
     aiGenerating: typeof Locale !== 'undefined' ? Locale.t('guideAiGenerating') : '🤖 AI 正在为「{taskName}」生成文档...',
     taskComplete: typeof Locale !== 'undefined' ? Locale.t('guideTaskComplete') : '👍 「{taskName}」完成！做得好',
     changeTrigger: typeof Locale !== 'undefined' ? Locale.t('guideChangeTrigger') : '⚠️ 有个变更需要处理',
@@ -861,7 +861,7 @@ const CharacterGuide = {
         </div>`}
         <!-- 章节徽章 -->
         <div class="cfp-section">
-          <div class="cfp-section-title">${typeof Locale !== 'undefined' ? Locale.t('panelChapters') : '章节'}</div>
+          <div class="cfp-section-title">${typeof Locale !== 'undefined' ? Locale.t('panelChapters') : '阶段'}</div>
           <div class="cfp-badges">
             ${chapterBadges.map(b => `
               <div class="cfp-badge ${b.done ? 'cfp-badge-done' : ''} ${b.active ? 'cfp-badge-active' : ''}">
@@ -970,7 +970,7 @@ const GameFeatures = {
     };
 
     CharacterGuide.updateHint('chapterName', {
-      chapterName: chapterNames[chapterId] || '当前章节'
+      chapterName: chapterNames[chapterId] || '当前阶段'
     });
   },
 
@@ -1477,11 +1477,11 @@ const ChapterIntro = {
     return `
       <div class="intro-credits">
         <div class="intro-credits-section">
-          <div class="intro-credits-title" style="animation-delay:${0.6 + taskList.length * 0.2}s">📋 ${typeof Locale !== 'undefined' ? Locale.t('introCreditsTasks') : '本章节任务'}</div>
+          <div class="intro-credits-title" style="animation-delay:${0.6 + taskList.length * 0.2}s">📋 ${typeof Locale !== 'undefined' ? Locale.t('introCreditsTasks') : '本阶段任务'}</div>
           ${taskItems}
         </div>
         <div class="intro-credits-section" style="animation-delay:${1.2 + taskList.length * 0.2}s">
-          <div class="intro-credits-title">📄 ${typeof Locale !== 'undefined' ? Locale.t('introCreditsDocs') : '本章节交付文档'}</div>
+          <div class="intro-credits-title">📄 ${typeof Locale !== 'undefined' ? Locale.t('introCreditsDocs') : '本阶段交付文档'}</div>
           ${docItems}
         </div>
       </div>`;
@@ -1526,7 +1526,6 @@ const ChapterIntro = {
     overlay.id = 'chapterIntroOverlay';
     overlay.innerHTML = `
       <div class="chapter-intro-content">
-        <div class="chapter-intro-icon">${dialogue.icon}</div>
         ${illustrationHTML ? '<div class="chapter-intro-illustration">' + illustrationHTML + '</div>' : ''}
         <h1 class="chapter-intro-title">${typeof Locale !== 'undefined' ? Locale.t(chapter.id + 'Name') : chapter.name}</h1>
         <div class="chapter-intro-subtitle">${dialogue.subtitle}</div>
@@ -1614,16 +1613,6 @@ const ChapterIntro = {
       @keyframes intro-content-rise {
         from { opacity: 0; transform: translateY(30px) scale(0.95); }
         to   { opacity: 1; transform: translateY(0) scale(1); }
-      }
-
-      .chapter-intro-icon {
-        font-size: 3rem;
-        margin-bottom: 16px;
-        animation: intro-bounce 1s ease-in-out infinite;
-      }
-      @keyframes intro-bounce {
-        0%, 100% { transform: translateY(0); }
-        50%      { transform: translateY(-10px); }
       }
 
       .chapter-intro-illustration {

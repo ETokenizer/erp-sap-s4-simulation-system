@@ -246,7 +246,7 @@ const LOCALES = {
 'btnContinueCh1': '继续体验 Ch.1',
 'registerFooter': '免费体验 Ch.1 全部内容，无需注册',
 'guestLockMsg': '注册账号解锁全部6章内容！',
-'lockedChapterMsg': '请先完成前置章节以解锁本章节',
+'lockedChapterMsg': '请先完成前置阶段以解锁本阶段',
 
 // ── 付费升级 ──
 'upgradeTitle': '升级付费用户',
@@ -330,7 +330,7 @@ const LOCALES = {
 'msgInitFail': '应用初始化失败：',
 'msgInvalidDoc': '文件链接无效（可能被移动了位置）',
 
-// ── 章节名称（data.js 内嵌） ──
+// ── 阶段名称（data.js 内嵌） ──
 'ch1Name': '战略发现与立项',
 'ch1Desc': '明确业务案例，评估可行性，做出立项决策',
 'ch2Name': '项目准备与计划',
@@ -344,7 +344,7 @@ const LOCALES = {
 'ch6Name': '上线护航与持续优化',
 'ch6Desc': '确保系统稳定运行，移交运维',
 
-// ── 章节工具 ──
+// ── 阶段工具 ──
 'toolPPTUsage': '立项汇报与供应商对比',
 'toolWordUsage': '项目章程与可研报告',
 'toolExcelUsage': 'ROI 分析与 TCO 测算，或其它专门的软件系统、工具',
@@ -575,8 +575,8 @@ const LOCALES = {
 'intro_ch5sub': 'Deploy — 上线准备与切换',
 'intro_ch6': '系统上线了，但战斗还没结束。现场护航、问题跟踪，确保稳定运行。',
 'intro_ch6sub': 'Run — 上线护航与持续优化',
-'introCreditsTasks': '本章节任务',
-'introCreditsDocs': '本章节交付文档',
+'introCreditsTasks': '本阶段任务',
+'introCreditsDocs': '本阶段交付文档',
 'introDismiss': '点击任意处继续',
 
 // ── 游戏化 — CharacterGuide ──
@@ -584,8 +584,8 @@ const LOCALES = {
 'guideNextTask': '当前任务：{taskName}',
 'guideParallel': '你可以并行做 {taskName}，节省时间 ⚡',
 'guideCritical': '⚠️ 这个任务在关键路径上，别拖延',
-'guideLocked': '完成前置章节才能解锁本章节 🔒',
-'guideChapterComplete': '章节完成！准备进入下一阶段 🎯',
+'guideLocked': '完成前置阶段才能解锁本阶段 🔒',
+'guideChapterComplete': '阶段完成！准备进入下一阶段 🎯',
 'guideAiGenerating': '🤖 AI 正在为「{taskName}」生成文档...',
 'guideTaskComplete': '👍 「{taskName}」完成！做得好',
 'guideChangeTrigger': '⚠️ 有个变更需要处理',
@@ -612,7 +612,7 @@ const LOCALES = {
 'panelNext': '下一步',
 'panelAllDone': '所有任务已完成！',
 'panelCongrats': '🎉 恭喜',
-'panelChapters': '章节',
+'panelChapters': '阶段',
 
 // ── 游戏化 — 消息 ──
 'msgTaskDone': '任务已完成 ✅',
@@ -1240,7 +1240,7 @@ const LOCALES = {
 'guideNextTask': 'Next: {taskName}',
 'guideParallel': 'You can do {taskName} in parallel to save time ⚡',
 'guideCritical': '⚠️ This task is on the critical path — don\'t delay',
-'guideLocked': 'Complete the previous phase to unlock 🔒',
+'guideLocked': 'Complete the previous phase to unlock this phase 🔒',
 'guideChapterComplete': 'Phase complete! Prepare for the next stage 🎯',
 'guideAiGenerating': '🤖 AI is generating "{taskName}"...',
 'guideTaskComplete': '👍 "{taskName}" done! Well done',
