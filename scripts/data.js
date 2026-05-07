@@ -26,7 +26,7 @@ const EMBEDDED_GAME_DATA = {
       "tools": [
         { "name": "PowerPoint", "usage": "立项汇报与供应商对比", "icon": "📽️" },
         { "name": "Word", "usage": "项目章程与可研报告", "icon": "📝" },
-        { "name": "Excel", "usage": "ROI 分析与 TCO 测算，或其它专门的软件系统、工具", "icon": "📈" }
+        { "name": "Excel", "usage": "ROI 分析与 TCO 测算", "icon": "📈" }
       ],
       "tasks": [
         { "id": "ch1-t1", "name": "业务痛点分析", "description": "调研企业当前业务痛点，明确为什么要上 SAP", "status": "pending", "estimatedHours": 8, "riskLevel": "low", "documentType": "DOC-001", "changeTrigger": false },
@@ -60,7 +60,7 @@ const EMBEDDED_GAME_DATA = {
         { "name": "PowerPoint", "usage": "启动会材料", "icon": "📽️" },
         { "name": "Visio", "usage": "组织架构与流程图", "icon": "🔗" },
         { "name": "Excel", "usage": "资源规划与预算跟踪", "icon": "📊" },
-        { "name": "Word", "usage": "项目管理制度文档，或其它专门的软件系统、工具", "icon": "📝" }
+        { "name": "Word", "usage": "项目管理制度文档", "icon": "📝" }
       ],
       "tasks": [
         { "id": "ch2-t1", "name": "组建项目团队与治理结构", "description": "定义项目组织结构、角色职责、决策机制", "status": "pending", "estimatedHours": 16, "riskLevel": "medium", "documentType": "DOC-006", "changeTrigger": false },
@@ -96,7 +96,7 @@ const EMBEDDED_GAME_DATA = {
         { "name": "SAP Signavio", "usage": "流程建模与分析", "icon": "📐" },
         { "name": "Excel", "usage": "Fit-Gap 分析跟踪", "icon": "📊" },
         { "name": "PowerPoint", "usage": "Workshop 汇报材料", "icon": "📽️" },
-        { "name": "Word", "usage": "业务蓝图文档，或其它专门的软件系统、工具", "icon": "📝" }
+        { "name": "Word", "usage": "业务蓝图文档", "icon": "📝" }
       ],
       "tasks": [
         { "id": "ch3-t1", "name": "现状流程调研 (AS-IS)", "description": "调研当前业务流程，绘制 AS-IS 流程图", "status": "pending", "estimatedHours": 40, "riskLevel": "medium", "documentType": "DOC-012", "changeTrigger": false },
@@ -130,7 +130,7 @@ const EMBEDDED_GAME_DATA = {
         { "name": "SAP GUI / ABAP Workbench", "usage": "系统配置与开发", "icon": "⚙️" },
         { "name": "SAP Solution Manager", "usage": "测试管理与系统监控", "icon": "🖥️" },
         { "name": "JIRA", "usage": "开发任务与缺陷跟踪", "icon": "🐛" },
-        { "name": "Excel", "usage": "配置文档与测试记录，或其它专门的软件系统、工具", "icon": "📊" }
+        { "name": "Excel", "usage": "配置文档与测试记录", "icon": "📊" }
       ],
       "tasks": [
         { "id": "ch4-t1", "name": "系统基础配置", "description": "配置组织架构、公司代码、工厂等基础数据", "status": "pending", "estimatedHours": 24, "riskLevel": "medium", "documentType": "DOC-017", "changeTrigger": false },
@@ -168,7 +168,7 @@ const EMBEDDED_GAME_DATA = {
         { "name": "Excel", "usage": "数据清洗与迁移校验", "icon": "📊" },
         { "name": "MS Project", "usage": "切换时间线管理", "icon": "📅" },
         { "name": "PowerPoint", "usage": "用户培训材料", "icon": "📽️" },
-        { "name": "Word", "usage": "操作手册，或其它专门的软件系统、工具", "icon": "📝" }
+        { "name": "Word", "usage": "操作手册", "icon": "📝" }
       ],
       "tasks": [
         { "id": "ch5-t1", "name": "用户验收测试 (UAT)", "description": "最终用户验证系统功能是否满足需求", "status": "pending", "estimatedHours": 40, "riskLevel": "high", "documentType": "DOC-023", "changeTrigger": true },
@@ -208,7 +208,7 @@ const EMBEDDED_GAME_DATA = {
         { "name": "SAP Solution Manager", "usage": "系统监控", "icon": "🖥️" },
         { "name": "JIRA Service Desk", "usage": "问题与事件跟踪", "icon": "🎫" },
         { "name": "Excel", "usage": "Hypercare 问题清单", "icon": "📊" },
-        { "name": "Word", "usage": "运维文档与总结报告，或其它专门的软件系统、工具", "icon": "📝" }
+        { "name": "Word", "usage": "运维文档与总结报告", "icon": "📝" }
       ],
       "tasks": [
         { "id": "ch6-t1", "name": "上线现场支持 (Hypercare)", "description": "上线后 1-3 个月的现场支持", "status": "pending", "estimatedHours": 120, "riskLevel": "high", "documentType": "DOC-031", "changeTrigger": false },

@@ -3,11 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <title>项目空间 - ERP SAP S4 HANA 上线模拟演练系统</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>📊</text></svg>">
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="styles/themes.css">
-  <link rel="stylesheet" href="styles/project-styles.css?v=53">
+  <link rel="stylesheet" href="styles/project-styles.css?v=54">
 </head>
 <body>
   <div class="app-container">
@@ -21,6 +24,7 @@
         <div class="header-actions">
           <a href="project-list.html" class="btn-ai-config" data-i18n="btnProjectList">📋 项目列表</a>
           <button class="btn-theme" id="langToggle" onclick="Locale.toggle()" title="切换语言" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);">🌐 EN</button>
+          <button class="btn-theme" id="btnAchievements" onclick="AchievementSystem.showAchievementPanel()" title="成就墙" style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);">🏆 成就</button>
           <div class="theme-switcher">
             <button class="btn-theme" id="themeToggle" title="切换主题" data-i18n="btnTheme">🎨 主题</button>
             <div class="theme-dropdown" id="themeDropdown">
@@ -577,9 +581,9 @@
   <script src="scripts/document-generator.js?v=49"></script>
   <script src="scripts/ai-service.js?v=49"></script>
   <script src="scripts/prompt-editor.js?v=50"></script>
-  <script src="scripts/data.js?v=49"></script>
-  <script src="scripts/game-features.js?v=64"></script>
-  <script src="scripts/app.js?v=64"></script>
+  <script src="scripts/data.js?v=52"></script>
+  <script src="scripts/game-features.js?v=65"></script>
+  <script src="scripts/app.js?v=67"></script>
   <script src="scripts/project-app.js?v=64"></script>
 
   <!-- 付费升级相关函数 -->

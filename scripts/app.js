@@ -199,23 +199,13 @@ function renderChapterHeader(chapter) {
   const header = document.getElementById('chapterHeader');
   if (!header) return;
 
-  // Build tool map for locale lookup
-  const toolMap = {
-    'PowerPoint': 'toolPPTUsage', 'Word': 'toolWordUsage', 'Excel': 'toolExcelUsage',
-    'MS Project': 'toolMSProjectUsage', 'Visio': 'toolVisioUsage', 'SAP Signavio': 'toolSignavioUsage',
-    'SAP GUI': 'toolSAPGUIUsage', 'Solution Manager': 'toolSolManUsage', 'JIRA': 'toolJIRAUsage',
-    'Solution Manager Operations': 'toolSolMonOpsUsage', 'JIRA Operations': 'toolJIRAOpsUsage'
-  };
-
   const toolsHtml = chapter.tools.map(tool => {
-    const usageKey = toolMap[tool.name] || null;
-    const usageText = usageKey && typeof Locale !== 'undefined' ? Locale.t(usageKey) : tool.usage;
     return `
     <div class="tool-item">
       <span class="tool-icon">${tool.icon}</span>
       <div>
         <span class="tool-name">${tool.name}</span>
-        <span class="tool-usage">- ${usageText}</span>
+        <span class="tool-usage">- ${tool.usage}</span>
       </div>
     </div>
   `}).join('');
@@ -241,6 +231,10 @@ function renderChapterHeader(chapter) {
     <div class="tools-section">
       <span style="color: var(--text-secondary); font-size: 0.85rem; margin-right: 8px;" data-i18n="recommendedTools">${typeof Locale !== 'undefined' ? Locale.t('recommendedTools') : '推荐工具:'}</span>
       ${toolsHtml}
+      <div class="tool-item tool-other" title="其它专门的软件系统、工具">
+        <span class="tool-icon">⚙️</span>
+        <span class="tool-name">其它专门的软件系统、工具</span>
+      </div>
     </div>
   `;
 }
@@ -948,6 +942,11 @@ function checkAllChaptersComplete() {
   });
 
   if (allComplete) {
+    // 解锁"总架构师"成就
+    if (typeof AchievementSystem !== 'undefined') {
+      AchievementSystem.unlockBadge('architect');
+    }
+
     setTimeout(() => {
       if (typeof CharacterGuide !== 'undefined') {
         CharacterGuide.showMessage(typeof Locale !== 'undefined' ? Locale.t('msgAllChaptersDone') : '🎉 恭喜完成全部演练！你已掌握 SAP 上线全流程！', 'happy', 6000);

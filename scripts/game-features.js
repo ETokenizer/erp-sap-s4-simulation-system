@@ -1019,6 +1019,11 @@ const GameFeatures = {
     });
 
     if (allDone) {
+      // 解锁章节徽章
+      if (typeof AchievementSystem !== 'undefined') {
+        AchievementSystem.unlockBadge(currentChapterId);
+      }
+
       CharacterGuide.setMood('happy');
       CharacterGuide.updateHint('chapterComplete', {});
     }
@@ -1711,7 +1716,9 @@ const ChapterIntro = {
   }
 };
 
-// 导出全局
+// ═══════════════════════════════════════════════════════════
+// 导出全局（AchievementSystem 在下面定义）
+// ═══════════════════════════════════════════════════════════
 window.NPCBubbles = NPCBubbles;
 window.CharacterGuide = CharacterGuide;
 window.ChapterIllustrations = ChapterIllustrations;
@@ -1719,3 +1726,927 @@ window.ChapterIntro = ChapterIntro;
 window.GameFeatures = GameFeatures;
 
 console.log('[GameFeatures] 模块加载完成');
+
+/**
+ * ═══════════════════════════════════════════════════════════
+ * 游戏化 - 成就系统 + 任务完成动画
+ *
+ * 功能：
+ * 1. 任务完成动画（盖章/扔文件/星星 3 种）
+ * 2. 章节完成成就徽章（6 个章节徽章）
+ * 3. 成就墙/成就面板
+ * 4. 走马灯式循环场景动画（可选）
+ * ═══════════════════════════════════════════════════════════
+ */
+
+const AchievementSystem = {
+  // 6 个章节的成就徽章定义
+  badges: {
+    'ch1': {
+      id: 'ch1',
+      name: '🔍 探索者',
+      title: '战略发现大师',
+      description: '完成第一章：战略发现与立项，成功说服高层立项',
+      icon: '🔍',
+      color: '#42a5f5',
+      chapter: 'Discover'
+    },
+    'ch2': {
+      id: 'ch2',
+      name: '📋 规划师',
+      title: '项目准备专家',
+      description: '完成第二章：项目准备与计划，组建完美团队',
+      icon: '📋',
+      color: '#66bb6a',
+      chapter: 'Prepare'
+    },
+    'ch3': {
+      id: 'ch3',
+      name: '🗺️ 设计师',
+      title: '蓝图规划大师',
+      description: '完成第三章：业务蓝图与方案设计，设计未来流程',
+      icon: '🗺️',
+      color: '#ffa726',
+      chapter: 'Explore'
+    },
+    'ch4': {
+      id: 'ch4',
+      name: '⚙️ 建造者',
+      title: '系统实现专家',
+      description: '完成第四章：系统配置与开发测试，搭建完整系统',
+      icon: '⚙️',
+      color: '#ab47bc',
+      chapter: 'Realize'
+    },
+    'ch5': {
+      id: 'ch5',
+      name: '🚀 发射官',
+      title: '上线切换指挥官',
+      description: '完成第五章：上线准备与切换，成功系统上线',
+      icon: '🚀',
+      color: '#ef5350',
+      chapter: 'Deploy'
+    },
+    'ch6': {
+      id: 'ch6',
+      name: '🛡️ 守护者',
+      title: '运维护航专家',
+      description: '完成第六章：上线护航与持续优化，确保稳定运行',
+      icon: '🛡️',
+      color: '#7e57c2',
+      chapter: 'Run'
+    }
+  },
+
+  // 特殊成就（隐藏成就）
+  specialBadges: {
+    'speedrun': {
+      id: 'speedrun',
+      name: '⚡ 闪电战',
+      title: '速通大师',
+      description: '在 30 分钟内完成所有章节',
+      icon: '⚡',
+      color: '#ffd54f',
+      hidden: true
+    },
+    'perfectionist': {
+      id: 'perfectionist',
+      name: '💎 完美主义',
+      title: '完美主义者',
+      description: '所有任务都使用 AI 生成文档',
+      icon: '💎',
+      color: '#e91e63',
+      hidden: true
+    },
+    'architect': {
+      id: 'architect',
+      name: '🏆 总架构师',
+      title: 'SAP 实施大师',
+      description: '获得全部 6 个章节徽章',
+      icon: '🏆',
+      color: '#ffc107',
+      hidden: true
+    }
+  },
+
+  // 已获得的成就列表（从 localStorage 加载）
+  unlockedBadges: [],
+  specialUnlocked: [],
+
+  // 初始化
+  init() {
+    this.loadBadges();
+    this.injectStyles();
+    this.checkExistingProgress(); // 检查已有进度，补发徽章
+    console.log('[AchievementSystem] 初始化完成，已获得', this.unlockedBadges.length, '个徽章');
+  },
+
+  // 检查已有项目进度，补发徽章（针对老项目）
+  checkExistingProgress() {
+    try {
+      const currentProjectId = localStorage.getItem('erpSimulationCurrentProject');
+      if (!currentProjectId) return;
+
+      const projectData = localStorage.getItem(`erp_project_${currentProjectId}`);
+      if (!projectData) return;
+
+      const data = JSON.parse(projectData);
+      const gameState = data.gameState || {};
+      // tasks 是对象，key 是任务 ID，value 是任务状态
+      const tasks = gameState.tasks || {};
+
+      // 使用内嵌章节数据（避免依赖 GameData 初始化）
+      const chapters = this._getChaptersData();
+      if (!chapters || chapters.length === 0) {
+        console.warn('[AchievementSystem] 章节数据未就绪，跳过进度检查');
+        return;
+      }
+
+      chapters.forEach((chapter, chapterIndex) => {
+        const chapterTaskIds = chapter.tasks.map(t => t.id);
+        const allTasksComplete = chapterTaskIds.every(taskId => {
+          const task = tasks[taskId]; // 对象访问，不是数组
+          return task && task.status === 'completed';
+        });
+
+        // 如果章节已完成但徽章未解锁，补发徽章（播放动画）
+        const badgeKey = `ch${chapterIndex + 1}`;
+        if (allTasksComplete && !this.unlockedBadges.includes(badgeKey)) {
+          console.log(`[AchievementSystem] 检测到已完成的章节 ${chapterIndex + 1}，补发徽章`);
+          this.unlockBadge(badgeKey, false); // false = 播放动画
+        }
+      });
+
+      // 检查"总架构师"成就
+      if (this.unlockedBadges.length >= 6 && !this.specialUnlocked.includes('architect')) {
+        this.specialUnlocked.push('architect');
+        this.saveBadges();
+        setTimeout(() => this.showGrandArchitectCelebration(), 1500);
+      }
+    } catch (e) {
+      console.warn('[AchievementSystem] 检查已有进度失败:', e);
+    }
+  },
+
+  // 获取章节数据（不依赖 GameData）
+  _getChaptersData() {
+    // 优先使用 GameData（如果已初始化）
+    if (typeof GameData !== 'undefined') {
+      const gameData = GameData.getGameData();
+      if (gameData && gameData.chapters) {
+        return gameData.chapters;
+      }
+    }
+    // 回退到内嵌数据
+    return this._embeddedChapters || [];
+  },
+
+  // 内嵌章节数据（用于 GameData 未就绪时）
+  _embeddedChapters: [
+    { id: 'ch1', name: '战略发现与立项', tasks: [
+      { id: 'ch1-t1' }, { id: 'ch1-t2' }, { id: 'ch1-t3' }, { id: 'ch1-t4' }, { id: 'ch1-t5' }
+    ]},
+    { id: 'ch2', name: '项目准备与计划', tasks: [
+      { id: 'ch2-t1' }, { id: 'ch2-t2' }, { id: 'ch2-t3' }, { id: 'ch2-t4' }, { id: 'ch2-t5' }, { id: 'ch2-t6' }
+    ]},
+    { id: 'ch3', name: '业务蓝图与方案设计', tasks: [
+      { id: 'ch3-t1' }, { id: 'ch3-t2' }, { id: 'ch3-t3' }, { id: 'ch3-t4' }, { id: 'ch3-t5' }, { id: 'ch3-t6' }
+    ]},
+    { id: 'ch4', name: '系统配置与开发测试', tasks: [
+      { id: 'ch4-t1' }, { id: 'ch4-t2' }, { id: 'ch4-t3' }, { id: 'ch4-t4' }, { id: 'ch4-t5' }, { id: 'ch4-t6' }, { id: 'ch4-t7' }, { id: 'ch4-t8' }
+    ]},
+    { id: 'ch5', name: '上线准备与切换', tasks: [
+      { id: 'ch5-t1' }, { id: 'ch5-t2' }, { id: 'ch5-t3' }, { id: 'ch5-t4' }, { id: 'ch5-t5' }, { id: 'ch5-t6' }, { id: 'ch5-t7' }, { id: 'ch5-t8' }
+    ]},
+    { id: 'ch6', name: '上线护航与持续优化', tasks: [
+      { id: 'ch6-t1' }, { id: 'ch6-t2' }, { id: 'ch6-t3' }, { id: 'ch6-t4' }, { id: 'ch6-t5' }, { id: 'ch6-t6' }
+    ]}
+  ],
+
+  // 从 localStorage 加载徽章
+  loadBadges() {
+    try {
+      const saved = localStorage.getItem('erp_achievement_badges');
+      if (saved) {
+        const data = JSON.parse(saved);
+        this.unlockedBadges = data.unlocked || [];
+        this.specialUnlocked = data.special || [];
+      }
+    } catch (e) {
+      console.warn('[AchievementSystem] 加载徽章失败:', e);
+      this.unlockedBadges = [];
+      this.specialUnlocked = [];
+    }
+  },
+
+  // 保存徽章到 localStorage
+  saveBadges() {
+    try {
+      localStorage.setItem('erp_achievement_badges', JSON.stringify({
+        unlocked: this.unlockedBadges,
+        special: this.specialUnlocked
+      }));
+    } catch (e) {
+      console.warn('[AchievementSystem] 保存徽章失败:', e);
+    }
+  },
+
+  // 解锁章节徽章
+  unlockBadge(chapterId, silent = false) {
+    if (!this.badges[chapterId]) return false;
+    if (this.unlockedBadges.includes(chapterId)) {
+      console.log('[AchievementSystem] 徽章已解锁:', chapterId);
+      return false;
+    }
+
+    this.unlockedBadges.push(chapterId);
+    this.saveBadges();
+    console.log('[AchievementSystem] 解锁徽章:', chapterId, this.badges[chapterId].name);
+
+    // 播放成就动画（仅非静默模式）
+    if (!silent) {
+      this.showBadgeUnlockAnimation(chapterId);
+    }
+
+    // 检查特殊成就
+    if (!silent) {
+      this.checkSpecialAchievements();
+    }
+
+    return true;
+  },
+
+  // 检查特殊成就
+  checkSpecialAchievements() {
+    // 检查"总架构师"成就
+    if (this.unlockedBadges.length >= 6 && !this.specialUnlocked.includes('architect')) {
+      this.specialUnlocked.push('architect');
+      this.saveBadges();
+      console.log('[AchievementSystem] 🏆 总架构师成就解锁！');
+
+      // 盛大的总架构师庆祝
+      setTimeout(() => {
+        this.showGrandArchitectCelebration();
+      }, 1000);
+    }
+  },
+
+  // 总架构师盛大庆祝
+  showGrandArchitectCelebration() {
+    // 1. 播放徽章解锁动画
+    this.showBadgeUnlockAnimation('architect');
+
+    // 2. 持续五彩纸屑爆发（多轮）
+    let rounds = 0;
+    const interval = setInterval(() => {
+      this.createConfetti();
+      rounds++;
+      if (rounds >= 5) clearInterval(interval);
+    }, 400);
+
+    // 3. 屏幕中央大标题
+    const title = document.createElement('div');
+    title.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 48px;
+      font-weight: bold;
+      color: #ffc107;
+      text-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+      z-index: 10000;
+      animation: grandTitlePulse 2s ease-in-out infinite;
+      pointer-events: none;
+    `;
+    title.innerHTML = '🏆 总架构师 🏆';
+    document.body.appendChild(title);
+
+    // 添加脉冲动画
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes grandTitlePulse {
+        0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
+      }
+    `;
+    document.head.appendChild(style);
+
+    // 4. 音效
+    this.playSound('unlock');
+
+    // 5. 5 秒后清理
+    setTimeout(() => {
+      title.remove();
+      style.remove();
+    }, 5000);
+  },
+
+  // 显示徽章解锁动画
+  showBadgeUnlockAnimation(badgeId) {
+    const badge = this.badges[badgeId] || this.specialBadges[badgeId];
+    if (!badge) return;
+
+    const overlay = document.createElement('div');
+    overlay.className = 'achievement-overlay';
+    overlay.innerHTML = `
+      <div class="achievement-popup">
+        <div class="achievement-header">
+          <span class="achievement-label">🎉 成就解锁!</span>
+        </div>
+        <div class="achievement-body">
+          <div class="achievement-icon" style="background: ${badge.color}">
+            ${badge.icon}
+          </div>
+          <div class="achievement-info">
+            <div class="achievement-name">${badge.name}</div>
+            <div class="achievement-title">${badge.title}</div>
+            <div class="achievement-description">${badge.description}</div>
+          </div>
+        </div>
+        <div class="achievement-footer">
+          <button class="achievement-close" onclick="AchievementSystem.closeAchievement()">太棒了!</button>
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(overlay);
+
+    // 动画效果
+    setTimeout(() => {
+      overlay.classList.add('active');
+      // 播放音效（如果浏览器支持）
+      this.playSound('unlock');
+    }, 100);
+
+    // 自动关闭（10 秒后）
+    this.autoCloseTimer = setTimeout(() => {
+      this.closeAchievement();
+    }, 10000);
+  },
+
+  // 关闭成就弹窗
+  closeAchievement() {
+    const overlay = document.querySelector('.achievement-overlay');
+    if (overlay) {
+      overlay.classList.remove('active');
+      setTimeout(() => overlay.remove(), 300);
+    }
+    if (this.autoCloseTimer) {
+      clearTimeout(this.autoCloseTimer);
+      this.autoCloseTimer = null;
+    }
+  },
+
+  // 播放音效
+  playSound(type) {
+    // 简单音效模拟（可选）
+    if (typeof AudioContext !== 'undefined') {
+      try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        if (type === 'unlock') {
+          osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+          osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.1);
+          osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.2);
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+          osc.start(ctx.currentTime);
+          osc.stop(ctx.currentTime + 0.4);
+        }
+      } catch (e) {
+        // 忽略音效错误
+      }
+    }
+  },
+
+  // 显示成就面板
+  showAchievementPanel() {
+    const panel = document.createElement('div');
+    panel.className = 'achievement-panel';
+    panel.innerHTML = `
+      <div class="achievement-panel-content">
+        <div class="achievement-panel-header">
+          <h2>🏆 成就墙</h2>
+          <button class="achievement-panel-close" onclick="AchievementSystem.closePanel()">×</button>
+        </div>
+        <div class="achievement-panel-body">
+          <div class="achievement-section">
+            <h3>章节徽章 (${this.unlockedBadges.length}/6)</h3>
+            <div class="achievement-badge-grid">
+              ${Object.keys(this.badges).map(id => {
+                const badge = this.badges[id];
+                const unlocked = this.unlockedBadges.includes(id);
+                return `
+                  <div class="achievement-badge-item ${unlocked ? 'unlocked' : 'locked'}">
+                    <div class="badge-icon" style="background: ${unlocked ? badge.color : '#e0e0e0'}">
+                      ${badge.icon}
+                    </div>
+                    <div class="badge-info">
+                      <div class="badge-name">${badge.name}</div>
+                      <div class="badge-title">${badge.title}</div>
+                      ${unlocked ? `<div class="badge-desc">${badge.description}</div>` : '<div class="badge-locked">🔒 未完成</div>'}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          ${this.specialUnlocked.length > 0 ? `
+          <div class="achievement-section">
+            <h3>特殊成就 (${this.specialUnlocked.length}/${Object.keys(this.specialBadges).length})</h3>
+            <div class="achievement-badge-grid">
+              ${this.specialUnlocked.map(id => {
+                const badge = this.specialBadges[id];
+                return `
+                  <div class="achievement-badge-item unlocked special">
+                    <div class="badge-icon" style="background: ${badge.color}">
+                      ${badge.icon}
+                    </div>
+                    <div class="badge-info">
+                      <div class="badge-name">${badge.name}</div>
+                      <div class="badge-title">${badge.title}</div>
+                      <div class="badge-desc">${badge.description}</div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+
+    document.body.appendChild(panel);
+    setTimeout(() => panel.classList.add('active'), 10);
+  },
+
+  // 关闭成就面板
+  closePanel() {
+    const panel = document.querySelector('.achievement-panel');
+    if (panel) {
+      panel.classList.remove('active');
+      setTimeout(() => panel.remove(), 300);
+    }
+  },
+
+  // 注入 CSS 样式
+  injectStyles() {
+    if (document.getElementById('achievement-styles')) return;
+
+    const style = document.createElement('style');
+    style.id = 'achievement-styles';
+    style.textContent = `
+      /* ========== 成就弹窗 ========== */
+      .achievement-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .achievement-overlay.active {
+        opacity: 1;
+      }
+
+      .achievement-popup {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        border-radius: 20px;
+        padding: 0;
+        max-width: 480px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        transform: scale(0.8) translateY(50px);
+        transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        overflow: hidden;
+      }
+      .achievement-overlay.active .achievement-popup {
+        transform: scale(1) translateY(0);
+      }
+
+      .achievement-header {
+        background: linear-gradient(90deg, #ffd54f, #ffecb3);
+        padding: 16px;
+        text-align: center;
+      }
+      .achievement-label {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #5d4037;
+      }
+
+      .achievement-body {
+        padding: 32px 24px;
+        display: flex;
+        align-items: center;
+        gap: 24px;
+      }
+      .achievement-icon {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        animation: achievementPulse 1s ease-in-out infinite;
+      }
+      @keyframes achievementPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+      }
+      .achievement-info {
+        flex: 1;
+        color: white;
+      }
+      .achievement-name {
+        font-size: 1.5rem;
+        font-weight: bold;
+        margin-bottom: 4px;
+      }
+      .achievement-title {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        margin-bottom: 8px;
+      }
+      .achievement-description {
+        font-size: 0.9rem;
+        opacity: 0.75;
+        line-height: 1.4;
+      }
+
+      .achievement-footer {
+        padding: 16px 24px 24px;
+        text-align: center;
+      }
+      .achievement-close {
+        background: linear-gradient(90deg, #ffd54f, #ffecb3);
+        border: none;
+        padding: 12px 48px;
+        border-radius: 25px;
+        font-size: 1rem;
+        font-weight: bold;
+        color: #5d4037;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+      .achievement-close:hover {
+        transform: scale(1.05);
+      }
+
+      /* ========== 成就面板 ========== */
+      .achievement-panel {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10001;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .achievement-panel.active {
+        opacity: 1;
+      }
+
+      .achievement-panel-content {
+        background: #1a1a2e;
+        border-radius: 16px;
+        max-width: 800px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+
+      .achievement-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .achievement-panel-header h2 {
+        margin: 0;
+        color: white;
+        font-size: 1.5rem;
+      }
+      .achievement-panel-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 2rem;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s;
+      }
+      .achievement-panel-close:hover {
+        opacity: 1;
+      }
+
+      .achievement-panel-body {
+        padding: 24px;
+      }
+      .achievement-section {
+        margin-bottom: 32px;
+      }
+      .achievement-section h3 {
+        color: #ffd54f;
+        margin: 0 0 16px 0;
+        font-size: 1.2rem;
+      }
+
+      .achievement-badge-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 16px;
+      }
+
+      .achievement-badge-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        border: 2px solid transparent;
+        transition: all 0.3s;
+      }
+      .achievement-badge-item.unlocked {
+        background: rgba(255, 213, 79, 0.1);
+        border-color: #ffd54f;
+      }
+      .achievement-badge-item.locked {
+        opacity: 0.5;
+        filter: grayscale(1);
+      }
+      .achievement-badge-item.special {
+        border-color: #e91e63;
+        background: rgba(233, 30, 99, 0.1);
+      }
+
+      .badge-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        flex-shrink: 0;
+      }
+      .badge-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .badge-name {
+        color: white;
+        font-weight: bold;
+        font-size: 1rem;
+        margin-bottom: 2px;
+      }
+      .badge-title {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.85rem;
+        margin-bottom: 4px;
+      }
+      .badge-desc {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.8rem;
+        line-height: 1.3;
+      }
+      .badge-locked {
+        color: rgba(255, 255, 255, 0.4);
+        font-size: 0.85rem;
+        font-style: italic;
+      }
+
+      /* ========== 任务完成动画 ========== */
+      .task-complete-animation {
+        position: fixed;
+        pointer-events: none;
+        z-index: 9999;
+      }
+
+      /* 盖章动画 */
+      .stamp-animation {
+        width: 120px;
+        height: 120px;
+        border: 4px solid #43a047;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: #43a047;
+        font-weight: bold;
+        background: rgba(67, 160, 71, 0.1);
+        animation: stampIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      }
+      @keyframes stampIn {
+        0% { transform: scale(2) rotate(-30deg); opacity: 0; }
+        50% { transform: scale(0.8) rotate(10deg); opacity: 1; }
+        70% { transform: scale(1.1) rotate(-5deg); }
+        100% { transform: scale(1) rotate(0deg); opacity: 1; }
+      }
+
+      /* 扔文件动画 */
+      .file-animation {
+        width: 80px;
+        height: 100px;
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 4px;
+        position: relative;
+        animation: fileFly 0.8s ease-in-out;
+      }
+      .file-animation::before {
+        content: '📄';
+        font-size: 2.5rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+      }
+      @keyframes fileFly {
+        0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(300px, -200px) rotate(720deg); opacity: 0; }
+      }
+
+      /* 星星动画 */
+      .star-animation {
+        width: 100px;
+        height: 100px;
+        position: relative;
+      }
+      .star-animation::before {
+        content: '⭐';
+        font-size: 4rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        animation: starPop 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+      }
+      @keyframes starPop {
+        0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+        50% { transform: translate(-50%, -50%) scale(1.3); }
+        100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      }
+
+      /* 五彩纸屑 */
+      .confetti {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        animation: confettiFall 3s linear forwards;
+      }
+      @keyframes confettiFall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(400px) rotate(720deg); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  },
+
+  // 播放任务完成动画
+  playTaskCompleteAnimation(task, animationType = 'random') {
+    const types = ['stamp', 'file', 'star'];
+    if (animationType === 'random') {
+      animationType = types[Math.floor(Math.random() * types.length)];
+    }
+
+    const container = document.createElement('div');
+    container.className = 'task-complete-animation';
+    container.style.left = '50%';
+    container.style.top = '50%';
+    container.style.transform = 'translate(-50%, -50%)';
+
+    switch (animationType) {
+      case 'stamp':
+        container.innerHTML = '<div class="stamp-animation">✅ 完成!</div>';
+        break;
+      case 'file':
+        container.innerHTML = '<div class="file-animation"></div>';
+        break;
+      case 'star':
+        container.innerHTML = '<div class="star-animation"></div>';
+        break;
+    }
+
+    document.body.appendChild(container);
+
+    // 添加五彩纸屑
+    if (animationType === 'star') {
+      this.createConfetti();
+    }
+
+    // 播放音效
+    this.playSound('unlock');
+
+    // 清理
+    setTimeout(() => container.remove(), 2000);
+  },
+
+  // 创建五彩纸屑
+  createConfetti() {
+    const colors = ['#f44336', '#2196f3', '#4caf50', '#ffeb3b', '#ff9800', '#e91e63'];
+    for (let i = 0; i < 30; i++) {
+      const confetti = document.createElement('div');
+      confetti.className = 'confetti';
+      confetti.style.left = Math.random() * 100 + '%';
+      confetti.style.top = '0';
+      confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDelay = Math.random() * 0.5 + 's';
+      document.body.appendChild(confetti);
+      setTimeout(() => confetti.remove(), 3000);
+    }
+  },
+
+  // 增强 onTaskComplete - 包装原有 GameFeatures.onTaskComplete
+  enhanceTaskComplete(originalFn) {
+    return function(task) {
+      // 调用原有函数
+      if (originalFn) originalFn(task);
+
+      // 播放任务完成动画
+      AchievementSystem.playTaskCompleteAnimation(task);
+
+      // 检查是否完成了整个章节
+      AchievementSystem.checkChapterProgress(task);
+    };
+  },
+
+  // 检查章节进度，解锁徽章
+  checkChapterProgress(completedTask) {
+    try {
+      // 获取当前项目任务状态
+      const currentProjectId = localStorage.getItem('erpSimulationCurrentProject');
+      if (!currentProjectId) return;
+
+      const projectData = localStorage.getItem(`erp_project_${currentProjectId}`);
+      if (!projectData) return;
+
+      const data = JSON.parse(projectData);
+      const tasks = data.gameState?.tasks || {};
+
+      // 确定任务属于哪个章节
+      const chapterMatch = completedTask.id?.match(/ch(\d+)-t/);
+      if (!chapterMatch) return;
+
+      const chapterNum = parseInt(chapterMatch[1]);
+      const chapterKey = `ch${chapterNum}`;
+
+      // 如果徽章已解锁，跳过
+      if (this.unlockedBadges.includes(chapterKey)) {
+        return;
+      }
+
+      // 获取该章节所有任务 ID
+      const chapterData = this._getChaptersData().find(c => c.id === chapterKey);
+      if (!chapterData) return;
+
+      // 检查是否所有任务都完成了
+      const allTasksComplete = chapterData.tasks.every(t => {
+        return tasks[t.id] && tasks[t.id].status === 'completed';
+      });
+
+      if (allTasksComplete) {
+        // 解锁徽章（播放动画）
+        console.log(`[AchievementSystem] 章节 ${chapterNum} 完成！解锁徽章`);
+        this.unlockBadge(chapterKey, false); // false = 播放动画
+      }
+    } catch (e) {
+      console.warn('[AchievementSystem] 检查章节进度失败:', e);
+    }
+  }
+};
+
+// 初始化成就系统
+AchievementSystem.init();
+
+// 增强 GameFeatures.onTaskComplete
+if (window.GameFeatures) {
+  const originalOnTaskComplete = GameFeatures.onTaskComplete;
+  GameFeatures.onTaskComplete = AchievementSystem.enhanceTaskComplete(originalOnTaskComplete);
+}
+
+// 导出 AchievementSystem
+window.AchievementSystem = AchievementSystem;
+console.log('[AchievementSystem] 已导出到全局');

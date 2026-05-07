@@ -369,6 +369,18 @@ body {
   font-size: 0.8rem;
 }
 
+.tool-other {
+  background: var(--bg-light);
+  border: 1px dashed var(--border-color);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.tool-other .tool-name {
+  color: var(--text-secondary);
+  font-weight: 400;
+}
+
 /* 任务列表 */
 .tasks-section {
   margin-top: var(--spacer-xl);
